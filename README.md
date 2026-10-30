@@ -1,87 +1,51 @@
-# McIver College — Logo Experience Lab
+# McIver College — Logo Experience Lab v1.4
 
-A source project for an interactive four-section logo-effects playground. Uses the **two McIver logo images from the previous conversation**, archived as originals and processed into clean alpha assets for rendering.
+**Download / open locally:** A React 19 + Vite interactive demonstration with two original college logos, four visual-library tabs and three interactive React Three Fiber showrooms.
 
-**Status:** source built and asset processing verified. The npm build and complete browser runtime **have not been verified in this sandbox** because npm registry access was unavailable. The project is **not yet publicly hosted**. Do not describe it as deployed.
+## Windows quick start
 
-## Start on Windows
+1. Install Node.js 22+ from https://nodejs.org/ if needed.
+2. Extract the ZIP. Double-click `start-lab.bat`.
+3. Open the address shown by Vite, usually `http://localhost:5173`.
 
-1. Install **Node.js 22 LTS** from https://nodejs.org/ if needed.
-2. Unzip the project and double-click **`start-lab.bat`**.
-3. Your browser should open the local Vite app (normally `http://localhost:5173`).
-
-Or from PowerShell:
+PowerShell alternative:
 
 ```powershell
-cd path\to\mciver-logo-lab
+cd C:\path\to\mciver-logo-lab
 npm install
 npm run dev
 ```
 
-For a production build:
+Build for deployment:
 
 ```powershell
 npm run build
 npm run preview
 ```
 
-## Four intentionally different sections
+The GitHub Pages workflow is in `.github/workflows/deploy-pages.yml`. Vercel/Netlify: build command `npm run build`, output folder `dist`.
 
-| Section | Main technique | Implementation |
+## Explore the lab
+
+| Tab | Primary capability | Website showcase |
 | --- | --- | --- |
-| React Three Fiber | True extruded emblem contours, gold/burgundy metal/glass/hologram materials, rear-facing legible text, drag-to-orbit | `@react-three/fiber` with Three.js `ExtrudeGeometry` and contour data traced from the original images |
-| Liquid Logo | GPU-rendered fluid chrome, reflective highlights, transparent negative space, mouse-disturbed flow | **Custom WebGL port** inspired by [collidingScopes/liquid-logo](https://github.com/collidingScopes/liquid-logo). The upstream project is a standalone tool, not a standard npm React package. |
-| Unlumen UI | Cinematic gallery, motion-spring cursor tilt, local spotlight and refractions | The public **[Unlumen UI Tilt primitive](https://github.com/leovvx/unlumen-ui-docs/blob/main/registry/primitives/tilt/index.tsx)** (MIT) ported from TSX to JSX; custom spotlight/gallery treatment is labelled as such. |
-| Magic UI | Beam tracing, particle ambience and masked shimmer | Local adaptations of [Border Beam](https://magicui.design/docs/components/border-beam) and [Particles](https://magicui.design/docs/components/particles). **Not exact upstream component code.** |
+| React Three Fiber | True 3D extruded logo, taper, smooth sides, front/rear views, studio lights, Glass/Metal | Switchable two-car showroom, sneaker configurator and two-floor interior explorer |
+| Liquid Logo | Original custom WebGL liquid-shader adaptation | Fluid website, liquid CTA, theme colours, interactive layout |
+| Unlumen UI | Spring-tilt primitive, pointer spotlight, radius and background blend | Editorial store, interactive hover cards, favourites and navigation |
+| Magic UI | Local border-beam, orbit, shimmer, particle treatments | Animated SaaS page, bento grid, counters, pricing and buttons |
 
-### 3D rotation modes
+**Preserved originals:** `public/logos/original/without.png` and `public/logos/original/with.png`. Separately derived transparent versions and traced 3D contour geometry are supplied for rendering.
 
-- **Keep Upright:** drag left/right, model stays vertically upright (yaw-only). `Auto-rotate` performs full 360° yaw cycles without turning upside down.
-- **Keep Text Readable:** the **rear imprint is a separate mesh rotated 180°**, so it is correctly readable when viewed from behind, rather than flipping the whole model.
-- **Free Rotation Mode:** drag for pitch/yaw; **Shift + drag** for roll. The upright lock is disabled while free rotation is active.
-- Pause/resume, reset, depth and material controls are independent of the other sections.
+**Glass update:** In React Three Fiber, opacity 0 gives highly clear optical glass, with transmissive sidewalls as well as front surfaces. On Metal and other presets, opacity is conventional alpha transparency. See `UPDATE-NOTES-v1.4.md` for technical details.
 
-Note: 360° **physical** rotation is implemented in the React Three Fiber section because the other three libraries are designed for *2D shader/image and UI interaction*, not true geometry. Their unique interactions deliberately remain distinct.
+**Unlumen update:** Card radius is applied to all visible layers and the shadow; new **Card surface blend** and **Frosted blur** controls allow adjustment against the global studio background.
 
-## The two original images and derivatives
+**Showroom models:** The built-in 3D models are original source-based procedural meshes and work offline. Optional Khronos public `.glb` models are selected under **3D asset source** and load over the internet. They are **not bundled**, to keep the ZIP small. Credits/licences are in the UI and update notes. An online model can take time to load and may fall back to the built-in alternative if unavailable.
 
-```
-public/logos/original/without.png  ← archived source; no modification
-public/logos/original/with.png     ← archived source; no modification
-public/logos/without.png          ← derived transparent/antialiased image
-public/logos/with.png             ← derived transparent/antialiased image
-public/geometry/without.json      ← vector-style contour data for 3D sidewalls
-public/geometry/with.json         ← vector-style contour data for 3D sidewalls
-```
+**Implementation honesty:** React Three Fiber and the vendored Unlumen Tilt primitive are genuine code from those technologies. Liquid Logo and Magic UI visuals are independently coded local adaptations, not official bundled packages or premium proprietary components. The demos use local-only form/commerce states and do not transact or subscribe anyone.
 
-The original images were white-backed raster graphics; contour extraction does not claim perfect vector fidelity. The **precise raster silhouettes** are retained as textures on the front and rear 3D caps when original colours are enabled. Source images are never overwritten. Do not distribute the McIver brand artwork as if it is open-source.
+## Testing limitation
 
-## Rebuild the transparent logos and 3D contour data (optional)
+The source has been statically checked for JSX/JS and CSS syntax, but dependencies were not available to do `npm run build` or inspect the full WebGL application here. Run on your PC for the final visual check, particularly material changes and Unlumen rounded corners.
 
-The generated files are included. Regeneration is only needed if you replace the source artwork. From the repository root, install the optional Python dependencies and run:
-
-```powershell
-python -m pip install -r tools/requirements.txt
-python tools/regenerate_logo_assets.py
-```
-
-The original artwork is never modified. Always inspect derived output before publishing.
-
-## Publish on GitHub Pages (after testing locally)
-
-1. Create a **new public repository** (e.g., `mciver-logo-lab`) on GitHub.
-2. Upload the project files to the repository's **`main`** branch. Upload the project contents, not the outer ZIP folder.
-3. Open **Settings → Pages → Build and deployment → Source → GitHub Actions**.
-4. The supplied `.github/workflows/deploy-pages.yml` builds and publishes the site. Open the workflow under **Actions** to confirm success. URL will resemble `https://YOUR-GITHUB-USERNAME.github.io/mciver-logo-lab/`.
-
-This app uses relative URLs and `base: './'` for project subpaths. If you publish it with Vercel or Netlify, use build command `npm run build`, output directory `dist`.
-
-## Design/technical attribution
-
-- React Three Fiber: https://r3f.docs.pmnd.rs/
-- Three.js ExtrudeGeometry: https://threejs.org/docs/pages/ExtrudeGeometry.html
-- Liquid Logo: https://github.com/collidingScopes/liquid-logo (MIT)
-- Unlumen UI: https://ui.unlumen.com/ (free/Pro components; locally adapted behaviour)
-- Magic UI: https://magicui.design/ (free/Pro components; locally adapted behaviour)
-
-Original McIver College artwork remains McIver College branding. Custom lab code is for the requested demonstration. No proprietary components are embedded. Google Fonts are loaded from the web; system font fallback works if offline. A WebGL-capable browser is needed for 3D/shader sections.
+For older changes, see `UPDATE-NOTES-v1.1.md`, `UPDATE-NOTES-v1.2.md`, and `UPDATE-NOTES-v1.3.md`.

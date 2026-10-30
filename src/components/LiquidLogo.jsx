@@ -16,6 +16,9 @@ uniform float distort;
 uniform float shine;
 uniform float opacity;
 uniform float original;
+uniform float waveScale;
+uniform float mouseResponse;
+uniform float metalContrast;
 uniform vec3 tint;
 float wave(vec2 p,float t){
  return sin(p.x*29.0 + sin(p.y*17.0+t)*3.0+t*1.8)*0.47+
@@ -26,8 +29,8 @@ void main(){
  vec2 v=uv;
  float t=time*motion;
  vec2 toMouse=uv-mouse;
- float nearby=exp(-dot(toMouse,toMouse)*15.0);
- float current=wave(uv*vec2(1.0,1.1),t);
+ float nearby=exp(-dot(toMouse,toMouse)*15.0)*mouseResponse;
+ float current=wave((uv-.5)*max(.3,waveScale)*vec2(1.0,1.1)+.5,t);
  vec2 flow=vec2(sin(uv.y*19.0+t*1.2),cos(uv.x*23.0-t*1.1));
  vec2 offset=(flow+vec2(current,-current*0.5))*(distort*.019)*(0.65+nearby);
  vec4 c=texture2D(logo,clamp(v+offset,0.0,1.0));
@@ -39,7 +42,7 @@ void main(){
  float rim=clamp(n*2.2,0.,1.);
  float crest=pow(max(0.0,sin(v.x*22.0+current*3.0+t*1.0)),15.0);
  float ribbon=pow(max(0.0,1.0-abs(sin(v.y*14.0+v.x*5.0+t*0.7+current*.4))),10.0);
- float reflection=clamp(crest*0.9+ribbon*0.7+rim*0.6,0.,1.);
+ float reflection=pow(clamp(crest*0.9+ribbon*0.7+rim*0.6,0.,1.),1.0/max(0.25,metalContrast));
  vec3 chrome=mix(vec3(.12,.085,.095),vec3(.96,.89,.65),clamp(.26+reflection*1.15,0.,1.));
  chrome=mix(chrome, tint, 0.38);
  vec3 base=mix(chrome, c.rgb, original);
@@ -76,7 +79,7 @@ export function LiquidLogo({variant,opts,paused}){
     if(cancelled)return;
     gl.bindTexture(gl.TEXTURE_2D,tex);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,image);
     let started=performance.now(),playTime=0,last=performance.now();
-    const unif={};for(let key of ['resolution','mouse','time','motion','liquid','distort','shine','opacity','original','tint'])unif[key]=gl.getUniformLocation(prog,key);
+    const unif={};for(let key of ['resolution','mouse','time','motion','liquid','distort','shine','opacity','original','tint','waveScale','mouseResponse','metalContrast'])unif[key]=gl.getUniformLocation(prog,key);
     const draw=now=>{
       if(cancelled)return;
       const pixelRatio=Math.min(window.devicePixelRatio||1,1.6);
@@ -95,6 +98,9 @@ export function LiquidLogo({variant,opts,paused}){
       gl.uniform1f(unif.shine,opts.shine);
       gl.uniform1f(unif.opacity,opts.opacity);
       gl.uniform1f(unif.original,opts.original?1:0);
+      gl.uniform1f(unif.waveScale,opts.waveScale ?? 1);
+      gl.uniform1f(unif.mouseResponse,opts.mouseResponse ?? 1);
+      gl.uniform1f(unif.metalContrast,opts.metalContrast ?? 1);
       const hex=opts.tint.replace('#','');const n=parseInt(hex,16)||0;
       gl.uniform3f(unif.tint,((n>>16)&255)/255,((n>>8)&255)/255,(n&255)/255);
       gl.drawArrays(gl.TRIANGLES,0,6);
@@ -107,7 +113,9 @@ export function LiquidLogo({variant,opts,paused}){
  },[variant]);
  const pointer=useRef([.5,.5]);
  return <div className="liquid-stage" onPointerMove={e=>{const r=e.currentTarget.getBoundingClientRect();pointer.current=[(e.clientX-r.left)/r.width,1-(e.clientY-r.top)/r.height]}} onPointerLeave={()=>pointer.current=[.5,.5]}>
-   <div className="liquid-orbits"/>
+   <div className="liquid-orbits" style={{opacity:opts.ambientFlow,filter:`hue-rotate(${opts.mode==='Mercury'?120:opts.mode==='Rose gold'?-20:0}deg)`}}/>
+   <div className="liquid-field liquid-field-a" style={{opacity:opts.ambientFlow,animationDuration:`${18/Math.max(.1,opts.speed)}s`}}/>
+   <div className="liquid-field liquid-field-b" style={{opacity:opts.ambientFlow*.55,animationDuration:`${24/Math.max(.1,opts.speed)}s`}}/>
    <canvas ref={el} className="liquid-art" style={{aspectRatio:variant==='with'?'1024 / 753':'1463 / 1075'}} role="img" aria-label="Animated liquid metal treatment of the McIver College logo"/>
    <div className="stage-hint">LIVE GPU SHADER <span>•</span> MOVE POINTER TO DISTURB FLOW</div>
  </div>;
